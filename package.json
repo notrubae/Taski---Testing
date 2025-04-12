@@ -1,7 +1,7 @@
 {
-  "name": "taski-bot",
+  "name": "taski",
   "version": "1.0.0",
-  "description": "Discord bot na úlohy a sledovanie nadávok",
+  "description": "Taski bot na úlohy a nadávky",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -9,7 +9,6 @@
     "deploy": "node deploy-commands.js"
   },
   "dependencies": {
-    "discord.js": "^14.11.0",
-    "dotenv": "^16.3.1"
+    "discord.js": "^14.11.0"
   }
 }
