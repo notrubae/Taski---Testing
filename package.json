@@ -1,17 +1,20 @@
 {
   "name": "discord-todo-bot",
   "version": "1.0.0",
-  "description": "Discord bot pre správu úloh a počítanie nadávok",
+  "description": "Discord bot pre správu úloh a moderovanie servera",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
   "dependencies": {
-    "discord.js": "^14.14.1"
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.3.1",
+    "mongoose": "^8.0.3",
+    "node-cron": "^3.0.3"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.2"
   },
   "engines": {
     "node": ">=16.9.0"
