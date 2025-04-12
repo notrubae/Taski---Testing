@@ -11,8 +11,8 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent, // Nezabudol si na Message Content Intent
     GatewayIntentBits.DirectMessages, // Pre DM príkazy
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.Presences,
+    GatewayIntentBits.GuildMembers,  // Povolenie na získanie informácií o členoch
+    GatewayIntentBits.Presences,     // Povolenie na sledovanie prítomnosti používateľov
   ],
   partials: ['CHANNEL'], // Pre spracovanie DM správ
 });
@@ -38,17 +38,14 @@ client.on('interactionCreate', async (interaction) => {
   }
 
   if (commandName === 'list') {
-    // Tu by sa mal vykonať kód na zobrazenie zoznamu úloh
     await interaction.reply('Zoznam úloh');
   }
 
   if (commandName === 'reset') {
-    // Tu by sa mal vykonať kód na resetovanie zoznamu
     await interaction.reply('Zoznam bol vymazaný');
   }
 
   if (commandName === 'count') {
-    // Tu by sa mal vykonať kód na počítanie nadávok
     await interaction.reply('Počet nadávok: 0');
   }
 
