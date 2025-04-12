@@ -1,5 +1,5 @@
 {
-  "name": "discord-bot",
+  "name": "Taski",
   "version": "1.0.0",
   "description": "Discord bot for task management and moderation.",
   "main": "index.js",
@@ -15,6 +15,6 @@
   "engines": {
     "node": ">=16.0.0"
   },
-  "author": "Tvoje Meno",
+  "author": "ilovecars",
   "license": "MIT"
 }
