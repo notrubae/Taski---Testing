@@ -1,77 +1,54 @@
-require('dotenv').config();
-const { Client, GatewayIntentBits, REST, Routes, Events } = require('discord.js');
+import { Client, GatewayIntentBits, Collection, Events } from 'discord.js';
+import dotenv from 'dotenv';
+import fs from 'node:fs';
+import path from 'node:path';
 
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-  ],
-});
+dotenv.config();
 
-// Príkazy pre bota
-const commands = [
-  {
-    name: 'add',
-    description: 'Pridá úlohu do zoznamu',
-    options: [
-      {
-        name: 'task',
-        description: 'Úloha na pridanie',
-        type: 3, // STRING
-        required: true,
-      },
-    ],
-  },
-  {
-    name: 'list',
-    description: 'Zobrazí zoznam úloh',
-  },
-];
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-// Registrácia príkazov
-async function registerCommands() {
-  const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+client.commands = new Collection();
 
-  try {
-    console.log('Začínam registráciu príkazov...');
-    await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
-      body: commands,
-    });
-    console.log('Príkazy boli úspešne zaregistrované!');
-  } catch (error) {
-    console.error('Chyba pri registrácii príkazov:', error);
-  }
+// Load commands dynamically from commands folder
+const commandsPath = path.join(process.cwd(), 'commands');
+const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+
+for (const file of commandFiles) {
+  const command = await import(`./commands/${file}`);
+  client.commands.set(command.default.data.name, command.default);
 }
 
-// Uloženie úloh do pamäte
-const tasks = [];
+const userSwearCounts = new Map();
 
-// Event pre pripravenie bota
-client.once(Events.ClientReady, () => {
-  console.log('Bot je online!');
+client.once(Events.ClientReady, c => {
+  console.log(`✅ Logged in as ${c.user.tag}`);
 });
 
-// Event pre spracovanie interakcií
-client.on(Events.InteractionCreate, async (interaction) => {
-  if (interaction.isCommand()) {
-    const { commandName } = interaction;
+client.on(Events.InteractionCreate, async interaction => {
+  if (!interaction.isChatInputCommand()) return;
 
-    if (commandName === 'add') {
-      const task = interaction.options.getString('task');
-      tasks.push(task);
-      await interaction.reply(`Úloha **${task}** bola pridaná do zoznamu.`);
-    } else if (commandName === 'list') {
-      if (tasks.length === 0) {
-        await interaction.reply('Zoznam úloh je prázdny.');
-      } else {
-        await interaction.reply(`Zoznam úloh:\n${tasks.map((t, i) => `${i + 1}. ${t}`).join('\n')}`);
-      }
-    }
+  const command = client.commands.get(interaction.commandName);
+  if (!command) return;
+
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+    await interaction.reply({ content: '⚠️ Nastala chyba pri vykonaní príkazu.', ephemeral: true });
   }
 });
 
-// Spustenie bota
-client.login(process.env.DISCORD_TOKEN).then(() => {
-  registerCommands();
+client.on(Events.MessageCreate, async message => {
+  if (message.author.bot) return;
+
+  const swears = ['kokot', 'debil', 'shit', 'fuck', 'idiot', 'kurva', 'suka']; // add more
+  const content = message.content.toLowerCase();
+  const found = swears.filter(swear => content.includes(swear));
+
+  if (found.length > 0) {
+    const count = userSwearCounts.get(message.author.id) || 0;
+    userSwearCounts.set(message.author.id, count + found.length);
+  }
 });
+
+client.login(process.env.DISCORD_TOKEN);
