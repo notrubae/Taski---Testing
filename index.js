@@ -1,16 +1,18 @@
 import { Client, GatewayIntentBits, Collection, Events } from 'discord.js';
-import dotenv from 'dotenv';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'url';
 
-dotenv.config();
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 client.commands = new Collection();
+client.tasks = new Map();
+client.userSwearCounts = new Map();
 
-// Load commands dynamically from commands folder
-const commandsPath = path.join(process.cwd(), 'commands');
+const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
 for (const file of commandFiles) {
@@ -18,10 +20,8 @@ for (const file of commandFiles) {
   client.commands.set(command.default.data.name, command.default);
 }
 
-const userSwearCounts = new Map();
-
-client.once(Events.ClientReady, c => {
-  console.log(`✅ Logged in as ${c.user.tag}`);
+client.once(Events.ClientReady, () => {
+  console.log(`✅ Taski je online ako ${client.user.tag}`);
 });
 
 client.on(Events.InteractionCreate, async interaction => {
@@ -31,23 +31,23 @@ client.on(Events.InteractionCreate, async interaction => {
   if (!command) return;
 
   try {
-    await command.execute(interaction);
+    await command.execute(interaction, client);
   } catch (error) {
     console.error(error);
-    await interaction.reply({ content: '⚠️ Nastala chyba pri vykonaní príkazu.', ephemeral: true });
+    await interaction.reply({ content: '⚠️ Chyba pri spracovaní príkazu.', ephemeral: true });
   }
 });
 
-client.on(Events.MessageCreate, async message => {
+client.on(Events.MessageCreate, message => {
   if (message.author.bot) return;
 
-  const swears = ['kokot', 'debil', 'shit', 'fuck', 'idiot', 'kurva', 'suka']; // add more
+  const swears = ['kokot', 'debil', 'shit', 'fuck', 'idiot', 'kurva', 'suka'];
   const content = message.content.toLowerCase();
   const found = swears.filter(swear => content.includes(swear));
 
   if (found.length > 0) {
-    const count = userSwearCounts.get(message.author.id) || 0;
-    userSwearCounts.set(message.author.id, count + found.length);
+    const current = client.userSwearCounts.get(message.author.id) || 0;
+    client.userSwearCounts.set(message.author.id, current + found.length);
   }
 });
 
