@@ -1,20 +1,15 @@
 {
-  "name": "Taski",
+  "name": "simple-discord-bot",
   "version": "1.0.0",
-  "description": "Discord bot for task management and moderation.",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "dependencies": {
-    "discord.js": "^14.0.0",
-    "mongoose": "^6.0.0",
-    "dotenv": "^10.0.0",
-    "node-cron": "^3.0.0"
+    "discord.js": "^14.0.0"
   },
-  "engines": {
-    "node": ">=16.0.0"
-  },
-  "author": "ilovecars",
-  "license": "MIT"
+  "devDependencies": {
+    "nodemon": "^2.0.0"
+  }
 }
